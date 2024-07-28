@@ -1,8 +1,8 @@
 import setuptools
 
 setuptools.setup(
-    name="z-server",
-    version="0.1.0.1",
+    name="zs-server",
+    version="0.1.0.0",
     author="Prajwal",
     author_email="pkumarjha@zscaler.com",
     long_description_content_type="text/markdown",
@@ -16,7 +16,7 @@ setuptools.setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "z-server = z_server.server:main",
+            "zs-server = z_server.server:main",
         ]
     }
 )
