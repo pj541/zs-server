@@ -16,7 +16,7 @@ setuptools.setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "zs-server = z_server.server:main",
+            "zs-server = zs_server.server:main",
         ]
     }
 )
