@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="zs-server",
-    version="0.1.0.1",
+    version="0.1.0.6",
     author="Prajwal",
     author_email="pkumarjha@zscaler.com",
     long_description_content_type="text/markdown",

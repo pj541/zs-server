@@ -54,7 +54,6 @@ class Proc:
                 self.__proc[websocket][hashproc]['exit_code'] = "-1"
                 self.__proc[websocket][hashproc]['status'] = True
         #if self.proc.get()
-
     def run_command(self,command, websocket, cwd=None):
         # if self.get
         #await websocket.send("Executed command with id x")
@@ -102,7 +101,7 @@ class Proc:
             taskhashproc = self.__proc[websocket].get('taskhashproc')
             if taskhashproc:
                 self.__taskprocid[taskhashproc]['status'] = True
-                self.__taskprocid[taskhashproc]['exit_code'] = "-1"
+                self.__taskprocid[taskhashproc]['exit_code'] = "1"
                 self.__taskprocid[taskhashproc]['output']= f"Task could not finish due to aborted connection from {websocket.remote_address[0]}"
 
             for hashproc in self.__proc.get(websocket).keys():
@@ -128,7 +127,7 @@ class Proc:
             ret_data['output'] = self.__proc.get(websocket).get(hashproc).get('output')
             ret_data['exit_code'] = self.__proc.get(websocket).get(hashproc).get('exit_code')
             ret_data['status'] = self.__proc.get(websocket).get(hashproc).get('status')
-            if ret_data['status'] or ret_data['exit_code']:
+            if ret_data['status'] or ret_data['exit_code'] is not None:
                 self.__proc.get(websocket).pop(hashproc)
             return json.dumps(ret_data)
         
@@ -136,13 +135,14 @@ class Proc:
             ret_data['output']= self.__taskprocid[hashproc]['output']
             ret_data['exit_code'] = self.__taskprocid[hashproc]['exit_code']
             ret_data['status'] = self.__taskprocid[hashproc]['status']
-            if ret_data['status'] or ret_data['exit_code']:
+            if ret_data['status'] or ret_data['exit_code'] is not None:
                 self.__taskprocid.pop(hashproc)
+                self.__proc[websocket].pop('taskhashproc')
             return json.dumps(ret_data)
         
         ret_data['status'] = False
         ret_data['message'] = f"Process ID - {hashproc} is not active"
-        ret_data['exit_code']= 1
+        ret_data['exit_code']= "-2"
         ret_data['output'] = None
         return json.dumps(ret_data)
     
@@ -174,8 +174,17 @@ class Proc:
                 return json.dumps({"status":True, "id": hashproc, "message": f"Successfully fetched pending task with id - {hashproc}", "output":taskop})
             return json.dumps({"status": False, "message": f"No pending task in queue with id {hashproc}"})
         return json.dumps({"status": True, "message":"Successfully fetched the first pending task.", "id": self.__taskmgmt.popleft()})
-# def get_proc_info(pid: int):
 
+    def set_first_pending_task(self, websocket, data):
+        data = json.loads(data)
+        if data.get('id') and self.__proc[websocket]['taskhashproc'] == data.get('id') and self.__taskprocid.get(data.get('id')):
+            self.__taskprocid[data.get('id')]['output'] = data.get('output')
+            self.__taskprocid[data.get('id')]['exit_code'] = data.get('exit_code')
+            self.__taskprocid[data.get('id')]['status'] = data.get('status')
+            return json.dumps({"status":True, "message": f"Successfully updated the status of pending task - {data.get('id')}"})
+        
+        return json.dumps({"status": False, "message": f"Cannot find task id - {data.get('id')}"})
+            
 WorkerProcess = Proc()
 async def server(websocket):
     WorkerProcess.insert_websocket(websocket)
@@ -185,7 +194,7 @@ async def server(websocket):
         async for command in websocket:
             # command = await websocket.recv()
             print(command)
-            print(f"CLient lenght = {len(WorkerProcess.get_all_clients())}")
+            print(f"Client lenght = {len(WorkerProcess.get_all_clients())}")
             print(websocket.remote_address)
             if "close" in command:
                 WorkerProcess.remove_websocket(websocket)
@@ -218,7 +227,10 @@ async def server(websocket):
                 await websocket.send(response)
                 continue
             # print(f'Executing command \'{command}\'')
-            
+            if "update_pending_id" in command:
+                response = WorkerProcess.set_first_pending_task(websocket=websocket, data= command.split("=")[-1])
+                await websocket.send(response)
+                continue
             response = WorkerProcess.run_command(command=command, websocket=websocket)
             # pid = WorkerProcess.run_command(command, hashproc)
             #await websocket.send("Executed command with id x")
