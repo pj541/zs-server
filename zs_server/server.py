@@ -223,7 +223,7 @@ async def server(websocket):
                 response = None
                 if len(command.split("=")) > 1:
                     response = WorkerProcess.get_first_pending_task(websocket = websocket, hashproc = command.split("=")[-1])
-                else: response = WorkerProcess.get_first_pending_task()
+                else: response = WorkerProcess.get_first_pending_task(websocket=websocket)
                 await websocket.send(response)
                 continue
             # print(f'Executing command \'{command}\'')
