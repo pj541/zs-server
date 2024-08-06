@@ -105,14 +105,15 @@ class Proc:
                     self.__taskprocid[taskhashproc]['status'] = True
                     self.__taskprocid[taskhashproc]['exit_code'] = "1"
                     self.__taskprocid[taskhashproc]['output']= f"Task could not finish due to aborted connection from {websocket.remote_address[0]}"
-
-            for hashproc in list(self.__proc.get(websocket).keys()):
-                ret_data= self.__proc.get(websocket).get(hashproc).get('status')
-                if not ret_data:
-                    subproc = self.__proc.get(websocket).get(hashproc).get('subproc')
-                    self.terminate(procid=subproc.pid)
-                    # print(self.__proc.get(websocket).get(hashproc).get('output'))
-                
+            try:
+                for hashproc in list(self.__proc.get(websocket).keys()):
+                    ret_data= self.__proc.get(websocket).get(hashproc).get('status')
+                    if not ret_data:
+                        subproc = self.__proc.get(websocket).get(hashproc).get('subproc')
+                        self.terminate(procid=subproc.pid)
+                        # print(self.__proc.get(websocket).get(hashproc).get('output'))
+            except Exception as E:
+                print(f"WARNING: {E}")
             self.__proc.pop(websocket, None)
 
     def get_all_clients(self):
