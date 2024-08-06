@@ -100,18 +100,19 @@ class Proc:
         if self.__proc.get(websocket) is not None:
             taskhashproc = self.__proc[websocket].get('taskhashproc')
             if taskhashproc:
-                self.__taskprocid[taskhashproc]['status'] = True
-                self.__taskprocid[taskhashproc]['exit_code'] = "1"
-                self.__taskprocid[taskhashproc]['output']= f"Task could not finish due to aborted connection from {websocket.remote_address[0]}"
+                self.__proc[websocket].pop('taskhashproc')
+                if self.__taskprocid.get(taskhashproc):
+                    self.__taskprocid[taskhashproc]['status'] = True
+                    self.__taskprocid[taskhashproc]['exit_code'] = "1"
+                    self.__taskprocid[taskhashproc]['output']= f"Task could not finish due to aborted connection from {websocket.remote_address[0]}"
 
-            for hashproc in self.__proc.get(websocket).keys():
+            for hashproc in list(self.__proc.get(websocket).keys()):
                 ret_data= self.__proc.get(websocket).get(hashproc).get('status')
                 if not ret_data:
                     subproc = self.__proc.get(websocket).get(hashproc).get('subproc')
                     self.terminate(procid=subproc.pid)
                     # print(self.__proc.get(websocket).get(hashproc).get('output'))
-
-            
+                
             self.__proc.pop(websocket, None)
 
     def get_all_clients(self):
@@ -137,7 +138,7 @@ class Proc:
             ret_data['status'] = self.__taskprocid[hashproc]['status']
             if ret_data['status'] or ret_data['exit_code'] is not None:
                 self.__taskprocid.pop(hashproc)
-                self.__proc[websocket].pop('taskhashproc')
+                # self.__proc[websocket].pop('taskhashproc')
             return json.dumps(ret_data)
         
         ret_data['status'] = False
