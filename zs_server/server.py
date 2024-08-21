@@ -268,7 +268,7 @@ async def server(websocket):
        
 async def start_server(user, password):
     
-    async with websockets.serve(server, port= 1463,create_protocol=websockets.basic_auth_protocol_factory(
+    async with websockets.serve(server,max_size=None, port= 1463,create_protocol=websockets.basic_auth_protocol_factory(
         realm="WorkerAgent",
         credentials=(user, password)
     )):
