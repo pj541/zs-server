@@ -258,8 +258,8 @@ async def server(websocket):
             #proc.join()
             #yield websocket.send(str(exit_code))
             await websocket.send(response)
-    
-    except websockets.ConnectionClosed as E:
+    except Exception as E:
+    # except websockets.ConnectionClosed as E:
         print(E)
         #print("SOMETHING")
         #clients.remove(websocket)
