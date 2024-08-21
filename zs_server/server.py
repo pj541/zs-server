@@ -30,7 +30,15 @@ class Proc:
         self.__taskprocid = dict()
         self.__taskmgmt = deque()
 
-        
+    # def __get_realtime_output(self, websocket, hashproc): #store output in buffer and clear it after sending the output
+    #     try:
+    #         while self.__proc.get(websocket) and self.__proc.get(websocket).get(hashproc):
+
+    #             self.__proc[websocket][hashproc]['output_buffer'] = "".join([self.__proc[websocket][hashproc]['output_buffer'], ])
+    #     except Exception as E:
+    #         print(E)
+    #         return
+
     def __execute(self, websocket, hashproc, command, cwd=None):
         print(f'Executing command \'{command}\'')
         #await websocket.send("Executed command with id x")
@@ -252,7 +260,7 @@ async def server(websocket):
             await websocket.send(response)
     
     except websockets.ConnectionClosed as E:
-        #print(E)
+        print(E)
         #print("SOMETHING")
         #clients.remove(websocket)
         WorkerProcess.remove_websocket(websocket)
